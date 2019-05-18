@@ -1,6 +1,29 @@
 
 #include "TimerOne.h"
 
+// Puertos
+
+int PtoRef=0;
+int PtoInt=1;
+int PtoProp=2;
+
+//Muestreo
+int n=0;
+int Fs = 200;
+float Delta = (float)1/Fs;
+long Ts =1000000/Fs;
+
+//Constantes PID
+  //Error   
+  float e = 0;
+  //Integral
+  float I=0, Iant=0; 
+  float ki=1;
+  float kib = ki*Delta;
+  //Proporcional
+  float kp=1; 
+  float P=0; 
+  
 // Constantes físicas
 
 float g=9.8;                 //kg*m/s^2
@@ -14,33 +37,23 @@ float alpha=0.5*Cd*Rho*A;
 float k=1;
 float Thao=0.1;
 
+// Valores de saturación.
+
+float uLimSup=12;
+float uLimInf=0;
+float yLimSup=0.5;
+float yLimInf=0;
+
 // Valores Nominales
 float VaNom=sqrt(m*g/alpha); 
 float uNom = sqrt(m*g/alpha/k);
-float x1Nom = 0.25;                    //Valor de referencia
-// Valores Nominales
+float x1Nom=0;
+
+// Variables sistema
 float Va=VaNom, Van=0, VaD=0;        //Velocidad Aire  
 float u=uNom,  uD=0;                 //Entrada 
 float x1=0,x1n=0, x1D=-x1Nom;        //Posición        
 float x2=0,x2n=0, xD=0;              //Velocidad 
-
-//Muestreo
-int n=0;
-int Fs = 200;
-float Delta = (float)1/Fs;
-long Ts =1000000/Fs;
-//long trigg=Ts/2;
-
-//Constantes PID
-  //Error  
-  float e = 0;
-  //Integral
-  float I=0, Iant=0; 
-  float ki = 4.4;
-  float kib = ki*Delta;
-  //Proporcional 
-  float kp = 5;
-  float P=0; 
 
 void setup() {
    Serial.begin(2000000);
@@ -53,52 +66,60 @@ void setup() {
 }
 
 void control()
-{   
-    
-    //Señal de referencia
-    n+=1;
-    if (n % (Ts/2)==0){
-      if (x1Nom <.5){
-        x1Nom = .5;
-      }else
-      x1Nom = .25;
-    } 
-    
+{       
+   
+    //Señal de referencia 0 a 0.5m
+     x1Nom=analogRead(PtoRef);
+     x1Nom=x1Nom/1023*.5;
+
+     //Señal Proporcional   0 a 10
+     kp=analogRead(PtoProp);
+     kp=kp/1023*10;
+
+     //Señal Integral   0 a 8
+     ki=analogRead(PtoInt);
+     ki=ki/1023*8;
+       
     // Control PI
     x1D=x1-x1Nom;
     e = 0-x1D;
     P = kp*e;
     I = Iant+kib*e;   
     uD =P+I;
+    Iant = I; 
+    
+    //Valores de saturación    
+    if(uD>(uLimSup-uNom)){
+       uD=uLimSup-uNom;
+    }
+    if (uD<(uLimInf-uNom)){
+       uD=uLimInf-uNom;
+    } 
     u=uD+uNom;
     
-    /*
-    if(u>11){
-      u=12;
-    }else{
-      u = P+I; //P+I;
-    }
-    */
-    
-    //Actualización de variables
-    Iant = I; 
-
     // Modelo de la planta
     x1n=x1+Delta*x2;
     x2n=x2+Delta*alpha/m*(Va-x2)*(Va-x2)-Delta*g; 
     Van=Va*(1-Delta/Thao)+u*Delta*k/Thao; 
 
-    //Variables de desviación 
+    //Límites de desplazamiento
+    if(x1n>yLimSup){
+      x1n=yLimSup;
+    }
+    if(x1n<yLimInf){
+      x1n=yLimInf;
+    }
+    //actualización de variables
     x1=x1n;
     x2=x2n;
     Va=Van;
 
     if (n % 5==0){
-       //Serial.print(x1Nom,3);
+       Serial.print(x1Nom*10,3);
        Serial.print('\t');
-      //Serial.print(e,3);
+       Serial.print(e*10,3);
        Serial.print('\t');
-       Serial.print(x1D,3);
+       Serial.print(x1D*10,3);
        Serial.print('\t');
        Serial.println(u,3);
     } 
