@@ -17,18 +17,20 @@ Serial myPort;        // The serial port
 int x1=0;    // horizontal position t
 int x2=0;   // horizontal position 
 int x3=0;   // horizontal position 
-int x4=0;   // horizontal position 
+int x4=0;   // horizontal position
 int Tam=370; //Tamaño graficas
 int Dist=30; //separación graficas
 float inByte1=0;
 float inByte2=0;
 float inByte3=0;
 float inByte4=0;
+float inByte5=0;
+float inByte6=0;
 PFont F;
 PFont f1;
 void setup () {
   // set the window size:
-  size(1600, 800);
+  size(1200, 800);
   F = createFont("Times New Roman", 20);
   f1 = createFont("Times New Roman", 17);
 
@@ -47,16 +49,16 @@ void setup () {
   // set inital background:
   background(0);
   strokeWeight(3);
-  //Gráfico1 
+  //Gráfico1 error
   Graf1(0, 0, Tam, Dist, "-50", "-30", "-10", "10", "30", "50");   
   text("error(cm)", 20, 20);
-  //Gráfico2
+  //Gráfico2 ki
   Graf(0, Tam+Dist, Tam, Dist, "0", "1.6", "3.2", "4.8", "6.4", "8");   
   text("k_i", 20, Tam+Dist+20);
-  //Gráfico3
+  //Gráfico3 kp
   Graf(Tam+Dist, Tam+Dist, Tam, Dist, "0", "2", "4", "6", "8", "10");   
   text("k_p", Tam+Dist+20, Tam+Dist+20);
-  //Gráfico4
+  //Gráfico4 tensión
   Graf(Tam+Dist, 0, Tam, Dist, "0", "2.4", "4.8", "7.2", "9.6", "12");   
   text("Tensión(v)", Tam+Dist+20, 20);
 }
@@ -107,7 +109,18 @@ void draw () {
   }
   // increment the horizontal position:
   x4++;
-}
+
+  fill(150);
+  stroke(150);
+  rect(2.8*Tam-37, Tam/3-35, 74, 4*Tam/3+70);
+  rect(2.8*Tam-47, 5*Tam/3+35, 94, 10);
+  fill(255);
+  stroke(255);
+  circle(Tam*2.8, Tam/3+inByte6, 70); 
+  fill(0,200,0);
+  stroke(0,200,0);
+  line(2.8*Tam-37, Tam/3+inByte5,2.8*Tam+37,Tam/3+inByte5);
+ }
 
 
 
@@ -134,6 +147,10 @@ void serialEvent (Serial myPort) {
     inByte3=map(nums[2], 0, 1000, 0, Tam-Dist-10);
     //map the fourth sensor value
     inByte4=map(nums[3], 0, 1200, 0, Tam-Dist-10);
+    //map the sixt sensor value
+    inByte5=map(nums[4], 0, 500, 0, 4*Tam/3);
+    //map the sixt sensor value
+    inByte6=map(nums[5], 0, 500, 0, 4*Tam/3);
   }
 }
 

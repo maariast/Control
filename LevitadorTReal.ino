@@ -114,15 +114,21 @@ void control()
     x2=x2n;
     Va=Van;
 
-    if (n % 5==0){
-       Serial.print(x1Nom*10,3);
+
+   // if (n % 5==0){  
+       Serial.print(e*1000);
+       Serial.print('\t');  
+       Serial.print(ki*100);       
+       Serial.print('\t');       
+       Serial.print(kp*100);
        Serial.print('\t');
-       Serial.print(e*10,3);
+       Serial.print(u*100); 
+       Serial.print('\t');      
+       Serial.print(x1Nom*1000);
        Serial.print('\t');
-       Serial.print(x1D*10,3);
-       Serial.print('\t');
-       Serial.println(u,3);
-    } 
+       Serial.print(x1*1000);
+       Serial.print("\n");
+    //} 
 }
 
 //Main loop no ejecuta ninguna acción
